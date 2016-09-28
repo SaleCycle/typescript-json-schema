@@ -1,0 +1,21 @@
+{
+  "name": "json-schema-typescript",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/index.js",
+  "scripts": {
+    "prepublish": "gulp build",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "salecycle",
+  "license": "ISC",
+  "devDependencies": {
+    "gulp": "^3.9.1",
+    "gulp-typescript": "^3.0.1",
+    "typescript": "^2.0.3"
+  },
+  "dependencies": {
+    "@types/glob": "^5.0.30",
+    "glob": "^7.1.0"
+  }
+}
