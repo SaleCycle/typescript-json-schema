@@ -54,7 +54,7 @@ export = async function (globPattern: string, outputDirectory: string): Promise<
     return;
   }
 
-  const schemas = files.map(file => new Schema(file, require(file)));
+  const schemas = files.map(file => new Schema(require(file)));
 
   return Promise.all(schemas.map(schema => generateInterfaceFile(schema, schemas, outputDirectory)))
     .then(files => {
