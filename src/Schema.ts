@@ -66,6 +66,10 @@ export class Schema {
         return this.requiredProps.includes(key);
     }
 
+    toProperty(): Property {
+        return new Property(this.title, this.rawSchema, this.id);
+    }
+
     validate() {
         if (!this.rawSchema || typeof this.rawSchema !== 'object' || Array.isArray(this.rawSchema)) {
             throw new Error('passed schema must be a JSON object');

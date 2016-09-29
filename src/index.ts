@@ -7,7 +7,7 @@ declare function require(moduleName: string): any;
 
 async function createOutputDir(directory: string): Promise<void> {
     if (!directory) {
-        return;
+        return Promise.resolve();
     }
 
     return new Promise((resolve, reject) => {
@@ -26,18 +26,23 @@ async function promisedGlob(globPattern: string): Promise<Array<string>> {
 }
 
 export = async function (globPattern: string, outputDirectory: string): Promise<Array<string>> {
-    const files = await promisedGlob(globPattern);
+    const files = await Promise.all([
+            promisedGlob(globPattern),
+            createOutputDir(outputDirectory)
+        ])
+        .then(results => results[0]);
 
     // if no files, nothing to do
     if (!files || files.length < 1) {
+        console.info('No JSON schema files found');
         return;
     }
 
-    // create the output directory
-    await createOutputDir(outputDirectory);
-
     const schemas = files.map(file => new Schema(file, require(file)));
 
-    return Promise.all(schemas.map(schema => generateTemplate(schema, schemas, outputDirectory)));
-
+    return Promise.all(schemas.map(schema => generateTemplate(schema, schemas, outputDirectory)))
+        .then(files => {
+            // remove any empty files
+            return files.filter(filename => !!filename);
+        });
 }
