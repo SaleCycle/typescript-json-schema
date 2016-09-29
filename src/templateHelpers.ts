@@ -1,7 +1,18 @@
 import {Schema} from "./Schema";
 import {Property} from "./Property";
+import * as fs from 'fs';
 /// <reference path="../types/left-pad/index.d.ts" />
 import leftPad = require('left-pad');
+
+function getRelatedSchema(arrSchemas: Array<Schema>, relatedId: string) {
+    const relatedSchema = arrSchemas.find(s => s.id === relatedId);
+
+    if (!relatedSchema) {
+        throw new Error(`Could not find referenced schema "${relatedId}"`);
+    }
+
+    return relatedSchema;
+}
 
 function sortProperties(a: Property, b: Property) {
     // case insensitive sort
@@ -17,7 +28,7 @@ function sortProperties(a: Property, b: Property) {
     return 0;
 }
 
-function writeProperties(schema: Schema|Property, indentation: number = 2): string {
+function writeProperties(schema: Schema|Property, arrSchemas: Array<Schema>, indentation: number = 2): string {
     return schema.properties
         .sort(sortProperties)
         .map(property => {
@@ -26,10 +37,10 @@ function writeProperties(schema: Schema|Property, indentation: number = 2): stri
 
             switch (property.typescriptType) {
                 case '___OBJECT___':
-                    result += `{\n${writeProperties(property, (indentation + 2))}\n  };`;
+                    result += `{\n${writeProperties(property, arrSchemas, (indentation + 2))}\n  };`;
                     break;
-                case '___ARRAY___':
-                    //do thing;
+                case '___REFERENCE___':
+                    result += `${getRelatedSchema(arrSchemas, property.ref).title};`;
                     break;
                 default:
                 result += `${property.typescriptType};`;
@@ -45,20 +56,28 @@ function writeProperties(schema: Schema|Property, indentation: number = 2): stri
         .join('\n');
 }
 
-/**
- * Created by steve.jenkins on 28/09/2016.
- */
-export function generateTemplate(schema: Schema): string {
-    return `export interface ${schema.title} {\n${writeProperties(schema)}\n}`;
+function writeImports(schema: Schema, arrSchemas: Array<Schema>): string {
+    if (schema.dependencies.length < 1) {
+        return '';
+    }
+
+    return schema.dependencies.map(dep => getRelatedSchema(arrSchemas, dep))
+        .map(s => `import {${s.title}} from './${s.outputFileName}';`)
+        .join(('\n')) + '\n\n';
 }
-/*
 
-export async function writeToFile(template: string, schema: Schema): Promise<string> {
+
+export async function generateTemplate(schema: Schema, arrSchemas: Array<Schema>, outputDirectory: string): Promise<string> {
+    const template = `${writeImports(schema, arrSchemas)}export interface ${schema.title} {\n${writeProperties(schema, arrSchemas)}\n}`;
+    return await writeToFile(template, schema, outputDirectory);
+}
+
+async function writeToFile(template: string, schema: Schema, outputDirectory: string): Promise<string> {
     return new Promise<string>((resolve, reject) => {
-        const fileName = `${schema.title}.d.ts`;
+        const fileName = `${outputDirectory}/${schema.outputFileName}.d.ts`;
 
-        writeFile(fileName, template, (err) => {
+        fs.writeFile(fileName, template, (err) => {
             return err ? reject(err) : resolve(fileName);
         });
     });
-}*/
+}

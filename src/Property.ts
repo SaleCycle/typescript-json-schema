@@ -46,15 +46,19 @@ function parseItems (itemsProp: any): string {
 }
 
 export class Property {
+    private parent: string;
     private hiddenKey: string;
     private hiddenType: string;
     private hiddenProps: Array<Property>;
     private requiredProperties: Array<string>;
     private hiddenArrayItemsType: string;
+    private hiddenRef: string;
 
-    constructor(key: string, objProp: any) {
+    constructor(key: string, objProp: any, parent: string) {
         this.hiddenKey = key;
         this.hiddenType = objProp.type;
+        this.hiddenRef = objProp.$ref;
+        this.parent = parent;
 
         this.validate();
 
@@ -75,11 +79,19 @@ export class Property {
         return this.hiddenKey;
     }
 
+    get ref(): string {
+        return this.hiddenRef;
+    }
+
     get properties(): Array<Property> {
         return this.hiddenProps;
     }
 
     get typescriptType(): string {
+        if (this.hiddenRef) {
+            return '___REFERENCE___';
+        }
+
         // if we're of type array and we have an items array, make an array of specified types
         // otherwise if we're just an array with no specified items, allow any
         if (this.hiddenType === 'array') {
@@ -111,8 +123,13 @@ export class Property {
             throw new Error('Property key must be supplied');
         }
 
-        if (!this.hiddenType) {
-            throw new Error('Property must have a type');
+        // if we have a reference - no need to validate type
+        if (!!this.hiddenRef) {
+            return;
+        }
+
+        if (!this.hiddenType && !this.hiddenRef) {
+            throw new Error(`Property "${this.key}" in schema "${this.parent}" must have a type or reference another schema`);
         }
 
         if (!validTypes.includes(this.hiddenType)) {

@@ -17,6 +17,7 @@
   "dependencies": {
     "@types/glob": "^5.0.30",
     "glob": "^7.1.0",
-    "left-pad": "^1.1.2"
+    "left-pad": "^1.1.2",
+    "mkdirp": "^0.5.1"
   }
 }

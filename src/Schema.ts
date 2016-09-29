@@ -12,11 +12,11 @@ export class Schema {
 
         this.validate();
 
-        this.requiredProps = this.rawSchema.required || Array<string>[];
+        this.requiredProps = this.rawSchema.required || [];
 
         // if we have properties, map them to be property objects
         if (this.hasProperties()) {
-            this.hiddenProps = Object.keys(this.rawSchema.properties).map(key => new Property(key, this.rawSchema.properties[key]));
+            this.hiddenProps = Object.keys(this.rawSchema.properties).map(key => new Property(key, this.rawSchema.properties[key], this.id));
         }
     }
 
@@ -25,16 +25,29 @@ export class Schema {
         return this.rawSchema.additionalProperties === false ? false : true;
     }
 
+    get dependencies(): Array<string> {
+        if (!this.hasProperties()) {
+            return [];
+        }
+
+        return this.properties.map(prop => prop.ref)
+            .filter(ref => !!ref);
+    }
+
+    get outputFileName(): string {
+        return this.title;
+    }
+
     get id(): string {
         return this.rawSchema.id;
     }
 
     get properties(): Array<Property> {
-        return this.hiddenProps;
+        return this.hiddenProps || [];
     }
 
     get title(): string {
-        return this.rawSchema.title || this.rawSchema.id.replace(/^\//, '') || this.name;
+        return this.rawSchema.title;
     }
 
     get type(): string {
@@ -64,6 +77,10 @@ export class Schema {
 
         if (!this.type) {
             throw new Error('Schema must have a "type" property');
+        }
+
+        if (!this.title) {
+            throw new Error('Schema must have a "title" property');
         }
 
         if (!this.rawSchema['$schema']) {
