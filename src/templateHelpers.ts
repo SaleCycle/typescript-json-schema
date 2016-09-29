@@ -37,7 +37,7 @@ function writeProperties(schema: Schema|Property, indentation: number = 2): stri
 
             // if property is not required add the ? after the key
             if (!schema.isPropertyRequired(property.key)) {
-                result = result.replace(':', '?;');
+                result = result.replace(':', '?:');
             }
 
             return result;
