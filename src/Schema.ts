@@ -49,7 +49,7 @@ export class Schema {
         return this.numProperties > 0;
     }
 
-    isRequired(key): boolean {
+    isPropertyRequired(key): boolean {
         return this.requiredProps.includes(key);
     }
 

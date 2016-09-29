@@ -1,41 +1,59 @@
 /**
  * Created by steve.jenkins on 28/09/2016.
  */
-
 const validTypes: Array<string> = ['array', 'boolean', 'integer', 'number', 'null', 'object', 'string'];
 
 export class Property {
     private hiddenKey: string;
-    private type: string;
+    private hiddenType: string;
+    private hiddenProps: Array<Property>;
+    private requiredProperties: Array<string>;
 
     constructor(key: string, objProp: any) {
         this.hiddenKey = key;
-        this.type = objProp.type;
+        this.hiddenType = objProp.type;
 
         this.validate();
+
+        if (this.hiddenType === 'object') {
+            this.hiddenProps = Object.keys(objProp.properties).map(propKey => new Property(propKey, objProp.properties[propKey]));
+            this.requiredProperties = objProp.required;
+        } else {
+            this.hiddenProps = [];
+            this.requiredProperties = [];
+        }
     }
 
     get key(): string {
         return this.hiddenKey;
     }
 
+    get properties(): Array<Property> {
+        return this.hiddenProps;
+    }
+
     get typescriptType(): string {
         // TODO arrays are special and have "items" property
-        if (this.type === 'array') {
-            return 'any';
+        if (this.hiddenType === 'array') {
+            return `Array<any>`;
+            // TODO array items is an object and may have 1 type or multiple types
+            // how to deal with multiple types?
         }
 
         // there is no TS type for int, only number
-        if (this.type === 'integer') {
+        if (this.hiddenType === 'integer') {
             return 'number';
         }
 
-        // TODO object have nested objects
-        if (this.type === 'object') {
-            return 'any';
+        if (this.hiddenType === 'object') {
+            return '___OBJECT___';
         }
 
-        return this.type;
+        return this.hiddenType;
+    }
+
+    isPropertyRequired(key): boolean {
+        return this.requiredProperties.includes(key);
     }
 
     validate() {
@@ -43,12 +61,12 @@ export class Property {
             throw new Error('Property key must be supplied');
         }
 
-        if (!this.type) {
+        if (!this.hiddenType) {
             throw new Error('Property must have a type');
         }
 
-        if (!validTypes.includes(this.type)) {
-            throw new Error(`Unknown type ${this.type}. Type must be one of ${JSON.stringify(validTypes)}`);
+        if (!validTypes.includes(this.hiddenType)) {
+            throw new Error(`Unknown type "${this.hiddenType}". Type must be one of ${JSON.stringify(validTypes)}`);
         }
     }
 }
