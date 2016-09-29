@@ -9,7 +9,7 @@ declare function require(moduleName: string): any;
  * Recursively create the output directory if it does not exist already
  * @param directory {string} the output directory to create
  */
-async function createOutputDir(directory: string): Promise<void> {
+async function createOutputDir(directory: string): Promise<any> {
   if (!directory) {
     return Promise.resolve();
   }
