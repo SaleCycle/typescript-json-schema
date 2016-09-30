@@ -15,7 +15,7 @@ async function createOutputDir(directory: string): Promise<any> {
   }
 
   return new Promise((resolve, reject) => {
-    mkdirp(directory, (err) => {
+    mkdirp(directory, (err: Error) => {
       return err ? reject(err) : resolve();
     });
   });
@@ -51,13 +51,13 @@ export = async function (globPattern: string, outputDirectory: string): Promise<
   // if no files, nothing to do
   if (!files || files.length < 1) {
     console.info('No JSON schema files found');
-    return;
+    return Promise.resolve([]);
   }
 
-  const schemas = files.map(file => new Schema(require(file)));
+  const schemas = files.map((file: string) => new Schema(require(file)));
 
-  return Promise.all(schemas.map(schema => generateInterfaceFile(schema, schemas, outputDirectory)))
-    .then(files => {
+  return Promise.all(schemas.map((schema: Schema) => generateInterfaceFile(schema, schemas, outputDirectory)))
+    .then((files: Array<string>) => {
       // remove any empty files
       return files.filter(filename => !!filename);
     });

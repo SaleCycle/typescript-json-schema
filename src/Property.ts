@@ -33,11 +33,11 @@ function getItemType(initialType: string): string {
 function parseItems (itemsProp: any): string {
   // not much we can do here, we just have to tell TS to allow any of the values
   if(itemsProp.anyOf) {
-    return itemsProp.anyOf.map(def => getItemType(def.type)).join('|');
+    return itemsProp.anyOf.map((def: any) => getItemType(def.type)).join('|');
   } else if (itemsProp.allOf) {
-    return itemsProp.allOf.map(def => getItemType(def.type)).join('|');
+    return itemsProp.allOf.map((def: any) => getItemType(def.type)).join('|');
   } else if (itemsProp.oneOf) {
-    return itemsProp.oneOf.map(def => getItemType(def.type)).join('|');
+    return itemsProp.oneOf.map((def: any) => getItemType(def.type)).join('|');
   }
 
   return getItemType(itemsProp.type);
