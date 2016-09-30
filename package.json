@@ -1,6 +1,6 @@
 {
   "name": "json-schema-typescript",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "Generate TypeScript interfaces from JSON schema files",
   "main": "dist/index.js",
   "scripts": {
