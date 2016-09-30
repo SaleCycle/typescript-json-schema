@@ -48,3 +48,4 @@ fabric.properties
 src/
 types/
 gulpfile.js
+tests/

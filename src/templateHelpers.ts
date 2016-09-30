@@ -141,6 +141,6 @@ export async function generateInterfaceFile(schema: Schema, arrSchemas: Array<Sc
   }
 
   // generate the template and write it (this is all on 1 line to avoid extra spaces)
-  const template = `${writeImports(schema, arrSchemas)}export interface ${schema.title} {\n${writeProperties(schema, arrSchemas)}\n}`;
+  const template = `${writeImports(schema, arrSchemas)}export interface ${schema.title} {\n${writeProperties(schema, arrSchemas)}\n}\n`;
   return await writeToFile(template, schema, outputDirectory);
 }

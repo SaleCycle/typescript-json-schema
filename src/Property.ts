@@ -31,6 +31,9 @@ function getItemType(initialType: string): string {
  * @returns {string} the allowed TS type(s)
  */
 function parseItems (itemsProp: any): string {
+  if (!itemsProp) {
+    return 'any';
+  }
   // not much we can do here, we just have to tell TS to allow any of the values
   if (itemsProp.anyOf) {
     return itemsProp.anyOf.map((def: any) => getItemType(def.type)).join('|');

@@ -27,7 +27,7 @@ async function createOutputDir(directory: string): Promise<any> {
  */
 async function promisedGlob(globPattern: string): Promise<Array<string>> {
   return new Promise<Array<string>>((resolve, reject) => {
-    glob(globPattern, (err, files) => {
+    glob(globPattern, { realpath: true },  (err, files) => {
       return err ? reject(err) : resolve(files);
     });
   });
