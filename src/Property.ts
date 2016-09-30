@@ -32,7 +32,7 @@ function getItemType(initialType: string): string {
  */
 function parseItems (itemsProp: any): string {
   // not much we can do here, we just have to tell TS to allow any of the values
-  if(itemsProp.anyOf) {
+  if (itemsProp.anyOf) {
     return itemsProp.anyOf.map((def: any) => getItemType(def.type)).join('|');
   } else if (itemsProp.allOf) {
     return itemsProp.allOf.map((def: any) => getItemType(def.type)).join('|');
@@ -147,14 +147,14 @@ export class Property {
    * @param key {string} the key to check for
    * @returns {boolean} true if the property is required, else false
    */
-  isPropertyRequired(key: string): boolean {
+  public isPropertyRequired(key: string): boolean {
     return this.requiredProperties.includes(key);
   }
 
   /**
    * Validate that we have the fields we need and that the type is valid
    */
-  validate(): void {
+  private validate(): void {
     if (!this.key) {
       throw new Error('Property key must be supplied');
     }

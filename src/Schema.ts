@@ -90,7 +90,7 @@ export class Schema {
    * Check if the schema has properties
    * @returns {boolean} true if we have at least 1 property, else false
    */
-  hasProperties(): boolean {
+  public hasProperties(): boolean {
     return this.numProperties > 0;
   }
 
@@ -99,7 +99,7 @@ export class Schema {
    * @param key {string} the key to check
    * @returns {boolean} true if required, else false if optional
    */
-  isPropertyRequired(key: string): boolean {
+  public isPropertyRequired(key: string): boolean {
     return this.requiredProps.includes(key);
   }
 
@@ -108,14 +108,14 @@ export class Schema {
    * be written into another interface
    * @returns {Property} the schema as a property
    */
-  toProperty(): Property {
+  public toProperty(): Property {
     return new Property(this.title, this.rawSchema, this.id);
   }
 
   /**
    * Validate that we have all the things we need to be able to create an interface
    */
-  validate() {
+  private validate() {
     if (!this.rawSchema || typeof this.rawSchema !== 'object' || Array.isArray(this.rawSchema)) {
       throw new Error('passed schema must be a JSON object');
     }
@@ -132,11 +132,11 @@ export class Schema {
       throw new Error('Schema must have a "title" property');
     }
 
-    if (!this.rawSchema['$schema']) {
+    if (!this.rawSchema.$schema) {
       throw new Error('Schema version must be specified');
     }
 
-    if (this.rawSchema['$schema'] !== 'http://json-schema.org/draft-04/schema') {
+    if (this.rawSchema.$schema !== 'http://json-schema.org/draft-04/schema') {
       throw new Error('Only schema version "http://json-schema.org/draft-04/schema" is supported at this time');
     }
   }

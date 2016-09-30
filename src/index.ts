@@ -1,8 +1,7 @@
-import * as glob from 'glob';
-import mkdirp = require('mkdirp');
 import {Schema} from './Schema';
 import {generateInterfaceFile} from './templateHelpers';
-
+import * as glob from 'glob';
+import mkdirp = require('mkdirp');
 declare function require(moduleName: string): any;
 
 /**
@@ -57,8 +56,8 @@ export = async function (globPattern: string, outputDirectory: string): Promise<
   const schemas = files.map((file: string) => new Schema(require(file)));
 
   return Promise.all(schemas.map((schema: Schema) => generateInterfaceFile(schema, schemas, outputDirectory)))
-    .then((files: Array<string>) => {
+    .then((fileNames: Array<string>) => {
       // remove any empty files
-      return files.filter(filename => !!filename);
+      return fileNames.filter(filename => !!filename);
     });
-}
+};

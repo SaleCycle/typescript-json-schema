@@ -1,5 +1,5 @@
-import {Schema} from "./Schema";
-import {Property} from "./Property";
+import {Property} from './Property';
+import {Schema} from './Schema';
 import * as fs from 'fs';
 /// <reference path="../types/left-pad/index.d.ts" />
 import leftPad = require('left-pad');
@@ -70,7 +70,7 @@ function writeImports(schema: Schema, arrSchemas: Array<Schema>): string {
  */
 function writeProperties(schema: Schema|Property, arrSchemas: Array<Schema>, indentation: number = 2): string {
   return schema.properties
-    .sort(sortProperties) //sort properties alphabetically
+    .sort(sortProperties) // sort properties alphabetically
     .map(property => {
       // get the key and sort the indentation out
       let result = `${property.key}: `;
@@ -91,7 +91,7 @@ function writeProperties(schema: Schema|Property, arrSchemas: Array<Schema>, ind
           } else {
             // if we get a property which isn't an object, convert it to a property and get it's type
             const prop = related.toProperty();
-            result += `${prop.typescriptType};`
+            result += `${prop.typescriptType};`;
           }
           break;
         default:
@@ -144,4 +144,3 @@ export async function generateInterfaceFile(schema: Schema, arrSchemas: Array<Sc
   const template = `${writeImports(schema, arrSchemas)}export interface ${schema.title} {\n${writeProperties(schema, arrSchemas)}\n}`;
   return await writeToFile(template, schema, outputDirectory);
 }
-
