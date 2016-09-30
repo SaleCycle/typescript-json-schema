@@ -42,6 +42,19 @@ function sortProperties(a: Property, b: Property): number {
   return 0;
 }
 
+function sortImports(a: Schema, b: Schema): number {
+  const nameA = `./${a.outputFileName}`;
+  const nameB = `./${b.outputFileName}`;
+
+  if (nameA < nameB) {
+    return -1;
+  }
+  if (nameA > nameB) {
+    return 1;
+  }
+  return 0;
+}
+
 /**
  * Create module import statements for any referenced schemas (if applicable)
  * NOTE imports are only created when the referenced schema is of type object.
@@ -57,6 +70,7 @@ function writeImports(schema: Schema, arrSchemas: Array<Schema>): string {
   return schema.dependencies
       .map(dep => getRelatedSchema(arrSchemas, dep)) // find the related schema
       .filter(s => s.type === 'object') // only import if schema is of type object
+      .sort(sortImports)
       .map(s => `import {${s.title}} from './${s.outputFileName}';`) // generate ES6 module import
       .join(('\n')) + '\n\n'; // write each import to a new line, leave 2 lines between imports and the interface definition
 }
