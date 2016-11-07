@@ -33,8 +33,13 @@ export class Schema {
       return [];
     }
 
-    return this.properties.map(prop => prop.ref)
-      .filter(ref => !!ref);
+    const deps: Array<string> = [];
+
+    this.properties.forEach(prop => {
+      deps.push(...prop.dependencies);
+    });
+
+    return deps;
   }
 
   /**

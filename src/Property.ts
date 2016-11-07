@@ -82,7 +82,36 @@ export class Property {
     // if the property is of type array then get the list of acceptable things in the array
     if (this.hiddenType === 'array') {
       this.hiddenArrayItemsType = parseItems(objProp.items);
+      this.hiddenRef = objProp.items.$ref;
     }
+  }
+
+  get dependencies(): Array<string> {
+    const result: Array<string> = [];
+
+    if (this.ref) {
+      result.push(this.ref);
+    }
+
+    if (!this.hasProperties()) {
+      return result;
+    }
+
+    this.properties.forEach(prop => {
+      if (prop.ref) {
+        result.push(prop.ref);
+        return;
+      }
+
+      if (!prop.hasProperties()) {
+        return;
+      }
+
+      console.log(prop.properties);
+      result.push(...prop.dependencies);
+    });
+
+    return result;
   }
 
   /**
@@ -145,6 +174,13 @@ export class Property {
     return this.hiddenType;
   }
 
+  public hasProperties(): boolean {
+    return !!this.properties && this.properties.length > 0;
+  }
+
+  public isArray(): boolean {
+    return this.hiddenType === 'array';
+  }
   /**
    * Is the child property required (true if required, else false)
    * @param key {string} the key to check for
