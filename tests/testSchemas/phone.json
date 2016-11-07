@@ -15,7 +15,8 @@
       "minLength": 5,
       "maxLength": 25,
       "description": "mobile phone number, +6589784344"
-    }
+    },
+    "tagBag":{ "$ref": "/shared/tagBag" }
   },
   "additionalProperties": false
 }

@@ -67,12 +67,18 @@ function writeImports(schema: Schema, arrSchemas: Array<Schema>): string {
     return '';
   }
 
-  return schema.dependencies
+  const deps = schema.dependencies
       .map(dep => getRelatedSchema(arrSchemas, dep)) // find the related schema
-      .filter(s => s.type === 'object') // only import if schema is of type object
+      .filter(s => s.type === 'object' && s.hasProperties()) // only import if schema is of type object
       .sort(sortImports)
-      .map(s => `import {${s.title}} from './${s.outputFileName}';`) // generate ES6 module import
-      .join(('\n')) + '\n\n'; // write each import to a new line, leave 2 lines between imports and the interface definition
+      .map(s => `import {${s.title}} from './${s.outputFileName}';`); // generate ES6 module import
+
+  // if we filtered out all the imports, rather than leaving blank lines return empty string
+  if (deps.length < 1) {
+    return '';
+  }
+
+  return deps.join(('\n')) + '\n\n'; // write each import to a new line, leave 2 lines between imports and the interface definition
 }
 
 /**
@@ -100,8 +106,12 @@ function writeProperties(schema: Schema|Property, arrSchemas: Array<Schema>, ind
           const related = getRelatedSchema(arrSchemas, property.ref);
 
           if (related.type === 'object') {
-            // if the referenced item is another object - reference it's interface
-            result += `${getRelatedSchema(arrSchemas, property.ref).title};`;
+            if (related.hasProperties()) {
+              // if the referenced item is another object - reference it's interface
+              result += `${related.title};`;
+            } else {
+              result += 'any;';
+            }
           } else {
             // if we get a property which isn't an object, convert it to a property and get it's type
             const prop = related.toProperty();
@@ -151,6 +161,11 @@ export async function generateInterfaceFile(schema: Schema, arrSchemas: Array<Sc
   if (schema.type !== 'object') {
     // if the schema is not an object schema we can't create an interface for it, just log and return
     console.warn(schema.title, 'is not of type object so no interface will be created');
+    return Promise.resolve('');
+  }
+
+  if (schema.properties.length < 1) {
+    console.warn(schema.title, 'has no child properties, using "any" as the type instead of creating interface');
     return Promise.resolve('');
   }
 
