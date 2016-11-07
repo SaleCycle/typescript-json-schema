@@ -67,9 +67,9 @@ function writeImports(schema: Schema, arrSchemas: Array<Schema>): string {
     return '';
   }
 
-  const deps = schema.dependencies
+  let deps = schema.dependencies
       .map(dep => getRelatedSchema(arrSchemas, dep)) // find the related schema
-      .filter(s => s.type === 'object' && s.hasProperties()) // only import if schema is of type object
+      .filter(s => (s.type === 'object' || s.type === 'array') && s.hasProperties()) // only import if schema is of type object
       .sort(sortImports)
       .map(s => `import {${s.title}} from './${s.outputFileName}';`); // generate ES6 module import
 
@@ -77,6 +77,17 @@ function writeImports(schema: Schema, arrSchemas: Array<Schema>): string {
   if (deps.length < 1) {
     return '';
   }
+
+  // get uniques
+  const temp = deps;
+  deps = [];
+
+  // remove any duplicates by copying between arrays
+  temp.forEach((item) => {
+    if (deps.indexOf(item) === -1) {
+      deps.push(item);
+    }
+  });
 
   return deps.join(('\n')) + '\n\n'; // write each import to a new line, leave 2 lines between imports and the interface definition
 }
@@ -106,11 +117,19 @@ function writeProperties(schema: Schema|Property, arrSchemas: Array<Schema>, ind
           const related = getRelatedSchema(arrSchemas, property.ref);
 
           if (related.type === 'object') {
+            let temp: string;
             if (related.hasProperties()) {
               // if the referenced item is another object - reference it's interface
-              result += `${related.title};`;
+              temp = `${getRelatedSchema(arrSchemas, property.ref).title}`;
             } else {
-              result += 'any;';
+              temp = 'any';
+            }
+
+            // if type is array, wrap it up in an array Object, otherwise return the interface name
+            if (property.isArray()) {
+              result += `Array<${temp}>;`
+            } else {
+              result += `${temp};`;
             }
           } else {
             // if we get a property which isn't an object, convert it to a property and get it's type
